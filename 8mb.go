@@ -38,11 +38,28 @@ func shrinkFile(file string, size float64) {
 	duration := getDuration(file)
 	bitrate := int(size / duration)
 	fmt.Printf("Shrinking %s to %.2fKB. Bitrate: %dk\n", file, size, bitrate)
+
+	temp := strings.TrimSuffix(file, filepath.Ext(file)) + ".pass1.mp4"
+
+	// pass 1
+	fmt.Println("Encoding pass 1...")
 	if err := ffmpeg.
-		Input(file).Output(output, ffmpeg.KwArgs{"b": fmt.Sprintf("%dk", bitrate), "filter:v": "fps=24", "c:a": "copy", "pix_fmt": "yuv420p10le", "c:v": "libx264"}).
+		Input(file).Output(temp, ffmpeg.KwArgs{"pass": "1", "b:v": fmt.Sprintf("%dk", bitrate), "filter:v": "fps=24", "pix_fmt": "yuv420p10le", "c:v": "libx264", "an": ""}).
 		Run(); err != nil {
 		fmt.Println(err)
+		os.Exit(1)
 	}
+	os.Remove(temp)
+	// pass 2
+	fmt.Println("Encoding pass 2...")
+	if err := ffmpeg.
+		Input(file).Output(output, ffmpeg.KwArgs{ "b:v": fmt.Sprintf("%dk", bitrate), "filter:v": "fps=24", "c:a": "copy", "pix_fmt": "yuv420p10le", "c:v": "libx264", "pass": "2", "f": "mp4"}).
+		Run(); err != nil {
+		panic(err)
+	}
+	// remove ffmpeg2pass-0.log and ffmpeg2pass-0.log.mbtree
+	os.Remove("ffmpeg2pass-0.log")
+	os.Remove("ffmpeg2pass-0.log.mbtree")
 	fmt.Printf("Shrunk to %s\n", shrinkPercentage(file, output))
 }
 
