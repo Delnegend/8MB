@@ -1,5 +1,5 @@
 # 8MB
----
+
 # Usage
 - Step 0: download the executable file according to your OS from [release page](https://github.com/Delnegend/8MB/releases) and extract it.
 - Step 1: open the terminal and drag the executable file into the terminal.
