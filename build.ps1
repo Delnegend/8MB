@@ -14,7 +14,7 @@ foreach ($item in $osArch) {
     $env:GOOS = $item.os
     $env:GOARCH = $item.arch
     $outputFile = "dist\8mb"
-    if ($item.fo -match "exe") {
+    if ($item.os -eq "windows") {
         $outputFile += ".exe"
     }
     Write-Output "Building for $env:GOOS-$env:GOARCH"
